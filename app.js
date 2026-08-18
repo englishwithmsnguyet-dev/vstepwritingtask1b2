@@ -805,6 +805,15 @@ let attemptCount = 0;
 
 // Initialize App
 function initApp() {
+    // Check login state
+    const studentInfo = localStorage.getItem('vstep_b2_student_info');
+    if (studentInfo) {
+        getElement('loginOverlay').style.display = 'none';
+        getElement('appContainer').style.display = 'flex';
+    } else {
+        getElement('loginOverlay').style.display = 'flex';
+    }
+    
     // Load progress from localStorage
     try {
         const savedCompleted = localStorage.getItem('vstep_b2_completed_letters');
@@ -861,6 +870,12 @@ function setupEventListeners() {
             switchTab(tabId);
         });
     });
+
+    // Login button
+    const btnLogin = getElement('btnLogin');
+    if (btnLogin) {
+        btnLogin.addEventListener('click', handleLogin);
+    }
 
     // Recitation buttons
     getElement('btnCheckAnswer').addEventListener('click', checkRecitationAnswer);
@@ -1313,6 +1328,37 @@ function updateSystemProgress() {
     } else {
         dashboardStatus.textContent = `Đang tiến hành. Đã hoàn thành ${completed}/${total} dạng thư.`;
     }
+}
+
+function handleLogin() {
+    const nameInput = getElement('studentName').value.trim();
+    const classInput = getElement('studentClass').value.trim().toUpperCase();
+    const errorDiv = getElement('loginError');
+
+    if (!nameInput) {
+        errorDiv.textContent = 'Vui lòng nhập Họ và Tên.';
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    const allowedClasses = ['CB201', 'CB202', 'B209'];
+    if (!allowedClasses.includes(classInput)) {
+        errorDiv.textContent = 'Lớp học không hợp lệ. Chỉ chấp nhận lớp: CB201, CB202, B209.';
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    errorDiv.classList.add('hidden');
+    
+    // Combine and submit
+    const combinedInfo = `${nameInput} - ${classInput}`;
+    getElement('formEntryInfo').value = combinedInfo;
+    getElement('googleForm').submit();
+
+    // Save to localStorage and unlock
+    localStorage.setItem('vstep_b2_student_info', combinedInfo);
+    getElement('loginOverlay').style.display = 'none';
+    getElement('appContainer').style.display = 'flex';
 }
 
 // Start app

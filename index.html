@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSTEP Writing TASK 01 - Interactive Learning</title>
+    <title>VSTEP WRITING TASK 01 - B2 LEVEL</title>
     <link rel="stylesheet" href="style.css?v=2.3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +38,31 @@
     </script>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-icon">
+                <i class="fa-solid fa-pen-nib"></i>
+            </div>
+            <h1 class="login-title">CHÀO MỪNG BẠN ĐẾN VỚI LỚP<br>HỌC CỦA MISS NGUYET</h1>
+            <p class="login-desc">Vui lòng điền Họ tên và Lớp học của bạn để bắt đầu học. Kết quả luyện tập sẽ được ghi nhận và gửi báo cáo cho giáo viên.</p>
+            
+            <div class="login-form">
+                <input type="text" id="studentName" class="login-input" placeholder="HỌ VÀ TÊN" autocomplete="off">
+                <input type="text" id="studentClass" class="login-input" placeholder="LỚP HỌC" autocomplete="off">
+                <div id="loginError" class="login-error hidden"></div>
+                <button id="btnLogin" class="login-btn">BẮT ĐẦU HỌC NGAY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden iframe for Google Form submission -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+    <form id="googleForm" action="https://docs.google.com/forms/d/e/1FAIpQLSdp8Lc1lEoZQDp1JwFVbj2itDrWnL9TRw0AY9he0vAbBHL4WA/formResponse" method="POST" target="hidden_iframe" style="display:none;">
+        <input type="text" name="entry.388968236" id="formEntryInfo">
+    </form>
+
+    <div class="app-container" id="appContainer" style="display: none;">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
