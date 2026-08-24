@@ -1333,6 +1333,7 @@ function updateSystemProgress() {
 function handleLogin() {
     const nameInput = getElement('studentName').value.trim();
     const classInput = getElement('studentClass').value.trim().toUpperCase();
+    const passwordInput = getElement('studentPassword').value.trim();
     const errorDiv = getElement('loginError');
 
     if (!nameInput) {
@@ -1344,6 +1345,12 @@ function handleLogin() {
     const allowedClasses = ['CB201', 'CB202', 'B209'];
     if (!allowedClasses.includes(classInput)) {
         errorDiv.textContent = 'Lớp học không hợp lệ. Chỉ chấp nhận lớp: CB201, CB202, B209.';
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    if (passwordInput !== 'VSTEPSEPTEMBER') {
+        errorDiv.textContent = 'Mật khẩu không chính xác. Vui lòng kiểm tra lại.';
         errorDiv.classList.remove('hidden');
         return;
     }
