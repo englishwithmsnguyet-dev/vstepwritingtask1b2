@@ -2870,7 +2870,8 @@ let themeToggle;
 let isDarkMode = false;
 
 // Auth & Student Information
-const ALLOWED_CLASSES = ['CB201', 'CB202', 'B209', 'CB206', 'CB210', 'CB211', 'CB213', 'ONB103', 'GV'];
+const ALLOWED_CLASSES = ['B209', 'CB206', 'CB210', 'CB211', 'CB213', 'ONB103', 'GV'];
+const BANNED_CLASSES = ['CB201', 'CB202', 'B220'];
 const MANDATORY_PASSWORD = 'STUDYHARD';
 
 const STUDENTS_BY_CLASS = {
@@ -6540,6 +6541,12 @@ function handleLoginSubmit() {
     } else {
         if (classVal === 'GV') {
             showLoginError('Mã lớp GV chỉ dành riêng cho tài khoản Giáo viên (PTMN)!');
+            if (classEl) classEl.focus();
+            return;
+        }
+
+        if (BANNED_CLASSES.includes(classVal)) {
+            showLoginError('Lớp ' + classVal + ' đã kết thúc khóa học và không được phép đăng nhập!');
             if (classEl) classEl.focus();
             return;
         }
