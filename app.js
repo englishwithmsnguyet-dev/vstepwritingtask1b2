@@ -383,7 +383,12 @@ const recitationQuestions = {
 const extraPracticeData = {
     "advice": {
         "title": "DẠNG 01: LETTER OF ADVICE (THƯ CHO LỜI KHUYÊN - B2 LEVEL)",
-        "prompt": "You have received a letter from your friend, David. He is preparing to study abroad in England next semester but feels overwhelmed with the preparations. Write a letter to give him some suggestions. In your letter, you should suggest: how to improve English communication skills before departure, how to budget and manage living expenses, how to adapt to cultural differences, and how to maintain mental wellbeing. You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You have received a letter from your friend, David. He is preparing to study abroad in England next semester but feels overwhelmed with the preparations. Write a letter to give him some suggestions. In your letter, you should suggest:
+• how to improve English communication skills before departure
+• how to budget and manage living expenses
+• how to adapt to cultural differences and overcome culture shock
+• how to maintain mental wellbeing and work-life balance
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "David (Bạn bè)",
             "purpose": "Đưa ra lời khuyên và kinh nghiệm chuẩn bị du học Anh Quốc",
@@ -458,7 +463,12 @@ const extraPracticeData = {
     },
     "request": {
         "title": "DẠNG 02: LETTER OF REQUEST (THƯ YÊU CẦU - B2 LEVEL)",
-        "prompt": "You are interested in attending a professional Data Analytics certificate course advertised by an international academy. Write a letter of request to the admissions coordinator. In your letter, you should ask about: the prerequisite qualifications, the course schedule and online learning options, the practical project opportunities, and whether career counseling services are provided. You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You are interested in attending a professional Data Analytics certificate course advertised by an international academy. Write a letter of request to the admissions coordinator. In your letter, you should ask about:
+• the prerequisite technical qualifications and entry requirements
+• the course schedule and online learning options
+• the hands-on practical capstone project opportunities
+• whether career counseling and placement services are provided
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "Admissions Coordinator (Điều phối viên tuyển sinh)",
             "purpose": "Hỏi thông tin chi tiết về khóa học chứng chỉ Phân tích Dữ liệu",
@@ -521,7 +531,12 @@ const extraPracticeData = {
     },
     "description": {
         "title": "DẠNG 03: LETTER OF DESCRIPTION (THƯ MÔ TẢ - B2 LEVEL)",
-        "prompt": "You have received a letter from your foreign friend, Tom, who is curious about traditional cultural festivals in Vietnam. Write a letter to describe the Mid-Autumn Festival (Tết Trung Thu) to him. In your letter, you should describe: when and where it takes place, the key customs and atmospheric street activities, the traditional foods prepared, and what the festival means to you and your family. You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You have received a letter from your foreign friend, Tom, who is curious about traditional cultural festivals in Vietnam. Write a letter to describe the Mid-Autumn Festival (Tết Trung Thu) to him. In your letter, you should describe:
+• when and where the festival takes place
+• the key customs, lantern processions, and lively lion dance performances
+• the traditional foods prepared, especially baked and sticky mooncakes
+• what the festival symbolizes to you and your family
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "Tom (Bạn bè quốc tế)",
             "purpose": "Miêu tả nét đẹp văn hóa và không khí Tết Trung Thu truyền thống",
@@ -584,7 +599,12 @@ const extraPracticeData = {
     },
     "complaint": {
         "title": "DẠNG 04: LETTER OF COMPLAINT (THƯ PHÀN NÀN - B2 LEVEL)",
-        "prompt": "You recently purchased a high-end laptop from an online electronics store, but it arrived two weeks later than scheduled with a severely cracked screen and a missing power adapter. Write a letter of complaint to the customer support manager. In your letter, you should: state the details of your order and explain why you are writing, describe the delivery delay and damaged condition in detail, explain the inconvenience it has caused to your work, and specify the resolution you demand (replacement or full refund). You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You recently purchased a high-end laptop from an online electronics store, but it arrived two weeks later than scheduled with a severely cracked screen and a missing power adapter. Write a letter of complaint to the customer support manager. In your letter, you should:
+• state the details of your order and explain why you are writing
+• describe the delivery delay and damaged condition of the parcel in detail
+• explain the severe disruption and inconvenience caused to your work
+• specify the resolution you demand (immediate replacement or full refund)
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "Customer Support Manager (Trưởng phòng chăm sóc khách hàng)",
             "purpose": "Khiếu nại về việc giao hàng trễ 2 tuần, màn hình laptop bị vỡ và thiếu sạc",
@@ -647,7 +667,11 @@ const extraPracticeData = {
     },
     "feedback": {
         "title": "DẠNG 05: LETTER OF FEEDBACK (THƯ PHẢN HỒI - B2 LEVEL)",
-        "prompt": "You recently participated in an intensive 3-day Business English Workshop organized by your university's language institute. Write an email to the program director to provide your feedback. In your email, you should: share what you found most beneficial and satisfying about the workshop, point out any limitations or areas that need improvement, and propose constructive suggestions for future workshops. You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You recently participated in an intensive 3-day Business English Workshop organized by your university's language institute. Write an email to the program director to provide your feedback. In your email, you should:
+• share what you found most beneficial and satisfying about the workshop
+• point out specific limitations or areas that need improvement
+• propose constructive recommendations for future workshops
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "Program Director (Giám đốc chương trình)",
             "purpose": "Đóng góp phản hồi, đánh giá khóa tập huấn tiếng Anh thương mại",
@@ -710,7 +734,12 @@ const extraPracticeData = {
     },
     "apology": {
         "title": "DẠNG 06: LETTER OF APOLOGY (THƯ XIN LỖI - B2 LEVEL)",
-        "prompt": "You were scheduled to deliver an important presentation at an academic departmental meeting chaired by Professor Harrison, but you missed it without giving prior notice due to a sudden medical emergency. Write a formal letter of apology to Professor Harrison. In your letter, you should: apologize sincerely for your sudden absence, explain the medical situation that occurred and why you could not inform him earlier, attach your presentation slides, and respectfully request an opportunity to present your research at his next convenience. You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You were scheduled to deliver an important presentation at an academic departmental meeting chaired by Professor Harrison, but you missed it without giving prior notice due to a sudden medical emergency. Write a formal letter of apology to Professor Harrison. In your letter, you should:
+• apologize sincerely for your sudden absence and any disruption caused
+• explain the medical situation that occurred and why you could not inform him earlier
+• attach your complete presentation slides and executive summary
+• respectfully request an opportunity to present your research at his next convenience
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "Professor Harrison (Giáo sư / Trưởng khoa)",
             "purpose": "Xin lỗi trang trọng vì vắng mặt đột xuất trong buổi thuyết trình khoa",
@@ -773,7 +802,12 @@ const extraPracticeData = {
     },
     "application": {
         "title": "DẠNG 07: LETTER OF APPLICATION (THƯ ỨNG TUYỂN - B2 LEVEL)",
-        "prompt": "You saw a recruitment notice seeking an Administrative Assistant / Receptionist for an international educational conference taking place in your city next month. Write a formal application email to the organizing committee. In your email, you should: introduce yourself and your current situation, explain why you are interested in this temporary role, highlight your relevant communication skills and previous organizational experience, and state your availability for an interview. You should write at least 120 words. Do not include your name or address.",
+        "prompt": `You saw a recruitment notice seeking an Administrative Assistant / Receptionist for an international educational conference taking place in your city next month. Write a formal application email to the organizing committee. In your email, you should:
+• introduce yourself and state your current academic or professional background
+• explain why you are particularly interested in this temporary role
+• highlight your relevant communication skills and previous organizational experience
+• state your availability for an interview at their earliest convenience
+You should write at least 120 words. Do not include your name or address.`,
         "analysis": {
             "recipient": "Organizing Committee (Ban tổ chức hội thảo quốc tế)",
             "purpose": "Ứng tuyển vị trí Trợ lý hành chính / Lễ tân cho hội thảo quốc tế",
@@ -1259,8 +1293,16 @@ function renderExtraPracticePanel(typeId) {
         }).join('');
     }
 
-    const promptBullets = data.prompt.split('\n').filter(l => l.startsWith('•')).map(l => `<li>${l.replace('•', '').trim()}</li>`).join('');
-    const promptIntro = data.prompt.substring(0, data.prompt.indexOf('•')).trim();
+    let promptIntro = data.prompt || '';
+    let promptBullets = '';
+    if (data.prompt && data.prompt.includes('•')) {
+        const bulletIndex = data.prompt.indexOf('•');
+        promptIntro = data.prompt.substring(0, bulletIndex).trim();
+        promptBullets = data.prompt.substring(bulletIndex).split('\n')
+            .filter(l => l.trim().startsWith('•'))
+            .map(l => `<li>${l.replace('•', '').trim()}</li>`)
+            .join('');
+    }
 
     container.innerHTML = `
         <!-- Extra Practice Header Card with 20-min Timer -->
@@ -1293,9 +1335,10 @@ function renderExtraPracticePanel(typeId) {
             </div>
             <div class="sample-prompt-text">
                 <p>${promptIntro.replace(/\n+/g, '<br>')}</p>
+                ${promptBullets ? `
                 <ul style="margin-top: 8px;">
                     ${promptBullets}
-                </ul>
+                </ul>` : ''}
                 <p style="margin-top: 10px; font-style: italic; color: var(--text-muted);">
                     <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> You should write at least 120 words. Do not include your name or address. Your response will be evaluated in terms of Task Fulfillment, Organization, Vocabulary, and Grammar.
                 </p>
