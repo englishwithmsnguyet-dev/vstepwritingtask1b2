@@ -3128,7 +3128,7 @@ function findStudentInfo(name) {
     const norm = normalizeVietnameseName(name);
     const noTone = removeVietnameseTones(norm);
 
-    if (norm === 'ptmn' || noTone === 'ptmn') {
+    if (norm === 'ptmn' || noTone === 'ptmn' || norm.includes('co nguyet') || noTone.includes('co nguyet') || norm.includes('giao vien') || noTone.includes('giao vien')) {
         return { name: 'Cô Nguyệt (PTMN)', class: 'GV', isTeacher: true };
     }
 
@@ -3155,6 +3155,49 @@ const GOOGLE_FORM_ENTRY_ID = "entry.388968236";
 
 let currentStudentName = '';
 let currentStudentClass = '';
+
+function isTeacherUser() {
+    const name = (currentStudentName || (typeof localStorage !== 'undefined' && localStorage.getItem('vstep_student_name')) || '').toUpperCase();
+    const cls = (currentStudentClass || (typeof localStorage !== 'undefined' && localStorage.getItem('vstep_student_class')) || '').toUpperCase();
+    return cls === 'GV' || name.includes('PTMN') || name.includes('NGUYỆT') || name.includes('NGUYET') || name.includes('GIÁO VIÊN') || name.includes('GIAO VIEN');
+}
+window.isTeacherUser = isTeacherUser;
+
+function removeWritingRestrictionsForTeacher() {
+    if (!isTeacherUser()) return;
+    try {
+        if (document.body) document.body.classList.add('teacher-mode');
+        document.querySelectorAll('textarea, input').forEach(el => {
+            el.oncopy = null;
+            el.onpaste = null;
+            el.oncut = null;
+            el.ondrop = null;
+            el.removeAttribute('oncopy');
+            el.removeAttribute('onpaste');
+            el.removeAttribute('oncut');
+            el.removeAttribute('ondrop');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('tab-locked');
+            btn.removeAttribute('title');
+        });
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('nav-locked');
+            item.removeAttribute('title');
+        });
+        const editBtn = document.getElementById('btnEditStudent');
+        if (editBtn) editBtn.classList.remove('btn-locked');
+        const resetBtn = document.getElementById('btnResetProgress');
+        if (resetBtn) resetBtn.classList.remove('btn-locked');
+        const banner1 = document.getElementById('recitationLockedBanner');
+        if (banner1) banner1.classList.add('hidden');
+        const banner2 = document.getElementById('fullPracticeLockedBanner');
+        if (banner2) banner2.classList.add('hidden');
+        const cheatModal = document.getElementById('cheatWarningModal');
+        if (cheatModal) cheatModal.classList.add('hidden');
+    } catch (e) {}
+}
+window.removeWritingRestrictionsForTeacher = removeWritingRestrictionsForTeacher;
 
 let loginModalOverlay;
 let studentNameInput;
@@ -3384,6 +3427,7 @@ function showAntiCopyToast(message) {
 
 // Unified Navigation Locking System for TRẢ BÀI & THỰC HÀNH
 function applyNavigationLock(activeTab) {
+    if (isTeacherUser()) return; // Teacher account: never lock
     document.querySelectorAll('.tab-btn').forEach(btn => {
         if (btn.dataset.tab !== activeTab) {
             btn.classList.add('tab-locked');
@@ -3424,6 +3468,7 @@ function removeNavigationLock() {
 
 // Lock / Unlock Navigation during Recitation (TRẢ BÀI)
 function lockNavigationDuringRecitation() {
+    if (isTeacherUser()) return; // Teacher account: never lock navigation
     isRecitationInProgress = true;
     applyNavigationLock('writingPractice');
 
@@ -3478,6 +3523,7 @@ function playCheatingAlertSound() {
 }
 
 function triggerRecitationCheatWarning(actionDescription) {
+    if (isTeacherUser()) return; // Teacher account: never trigger cheat warning
     if (!isRecitationInProgress) return;
     if (isRecitationCheatModalOpen) return;
 
@@ -3607,6 +3653,7 @@ function disqualifyRecitationForCheating() {
 
 function initRecitationAntiCheatingEvents() {
     document.addEventListener('visibilitychange', () => {
+        if (isTeacherUser()) return;
         if (isRecitationInProgress && !isRecitationCheatModalOpen) {
             if (document.visibilityState === 'hidden') {
                 hasLeftRecitationTab = true;
@@ -3618,9 +3665,11 @@ function initRecitationAntiCheatingEvents() {
     });
 
     window.addEventListener('blur', () => {
+        if (isTeacherUser()) return;
         if (isRecitationInProgress && !isRecitationCheatModalOpen) {
             if (recitationBlurTimer) clearTimeout(recitationBlurTimer);
             recitationBlurTimer = setTimeout(() => {
+                if (isTeacherUser()) return;
                 if (isRecitationInProgress && !isRecitationCheatModalOpen) {
                     if (!document.hasFocus() || document.hidden) {
                         hasLeftRecitationTab = true;
@@ -3631,6 +3680,7 @@ function initRecitationAntiCheatingEvents() {
     });
 
     window.addEventListener('focus', () => {
+        if (isTeacherUser()) return;
         if (recitationBlurTimer) {
             clearTimeout(recitationBlurTimer);
             recitationBlurTimer = null;
@@ -3644,6 +3694,7 @@ function initRecitationAntiCheatingEvents() {
 
 // Lock / Unlock Navigation during Full Practice (THỰC HÀNH)
 function lockNavigationDuringFullPractice() {
+    if (isTeacherUser()) return; // Teacher account: never lock navigation
     isFullPracticeInProgress = true;
     applyNavigationLock('fullPractice');
 
@@ -5408,13 +5459,15 @@ function markLetterCompleted(letterId) {
 }
 
 function resetLearningProgress() {
-    if (isRecitationInProgress) {
-        triggerRecitationCheatWarning('làm mới tiến độ học tập trong lúc trả bài');
-        return;
-    }
-    if (isFullPracticeInProgress) {
-        showToastNotice('🔒 Đang trong thời gian làm bài thực hành! Không thể làm mới tiến độ lúc này.', 'fa-solid fa-lock');
-        return;
+    if (!isTeacherUser()) {
+        if (isRecitationInProgress) {
+            triggerRecitationCheatWarning('làm mới tiến độ học tập trong lúc trả bài');
+            return;
+        }
+        if (isFullPracticeInProgress) {
+            showToastNotice('🔒 Đang trong thời gian làm bài thực hành! Không thể làm mới tiến độ lúc này.', 'fa-solid fa-lock');
+            return;
+        }
     }
     if (confirm('Bạn có chắc chắn muốn làm mới toàn bộ tiến độ học tập không?')) {
         try {
@@ -5868,13 +5921,16 @@ function prevRecitationQuestion() {
 
 // Show Welcome Screen
 function showWelcomeScreen() {
-    if (isRecitationInProgress) {
-        triggerRecitationCheatWarning('rời khỏi bài để về Trang chủ');
-        return;
-    }
-    if (isFullPracticeInProgress) {
-        showToastNotice('🔒 Đang trong thời gian thực hành viết bài (20 phút)! Bạn không thể rời khỏi bài cho đến khi nộp bài.', 'fa-solid fa-lock');
-        return;
+    if (typeof stopSampleAudio === 'function') stopSampleAudio();
+    if (!isTeacherUser()) {
+        if (isRecitationInProgress) {
+            triggerRecitationCheatWarning('rời khỏi bài để về Trang chủ');
+            return;
+        }
+        if (isFullPracticeInProgress) {
+            showToastNotice('🔒 Đang trong thời gian thực hành viết bài (20 phút)! Bạn không thể rời khỏi bài cho đến khi nộp bài.', 'fa-solid fa-lock');
+            return;
+        }
     }
     activeLetterTypeId = null;
     
@@ -5948,13 +6004,15 @@ function renderNav() {
 // Select a Letter Type
 function selectLetterType(id) {
     if (typeof stopSampleAudio === 'function') stopSampleAudio();
-    if (isRecitationInProgress) {
-        triggerRecitationCheatWarning('chuyển sang dạng thư khác trên thanh điều hướng');
-        return;
-    }
-    if (isFullPracticeInProgress) {
-        showToastNotice('🔒 Đang trong thời gian thực hành viết bài (20 phút)! Bạn không thể rời khỏi bài cho đến khi nộp bài.', 'fa-solid fa-lock');
-        return;
+    if (!isTeacherUser()) {
+        if (isRecitationInProgress) {
+            triggerRecitationCheatWarning('chuyển sang dạng thư khác trên thanh điều hướng');
+            return;
+        }
+        if (isFullPracticeInProgress) {
+            showToastNotice('🔒 Đang trong thời gian thực hành viết bài (20 phút)! Bạn không thể rời khỏi bài cho đến khi nộp bài.', 'fa-solid fa-lock');
+            return;
+        }
     }
     activeLetterTypeId = id;
     
@@ -7158,7 +7216,7 @@ function submitFullPractice(isAutoTimeUp = false) {
     const userText = fullPracticeInput ? fullPracticeInput.value.trim() : '';
     const wordCount = countWords(userText);
 
-    if (!isAutoTimeUp) {
+    if (!isAutoTimeUp && !isTeacherUser()) {
         let confirmMsg = 'BẠN CÓ CHẮC CHẮN MUỐN NỘP BÀI THỰC HÀNH KHÔNG?\n\n';
         if (wordCount < 120) {
             confirmMsg += `⚠️ Chú ý: Bài viết của bạn hiện có ${wordCount} từ (chưa đạt chuẩn tối thiểu 120 từ).\n\n`;
@@ -7218,16 +7276,25 @@ function initAuthSystem() {
         updateStudentProfileUI('', '');
         openLoginModal();
     }
+
+    // Ensure teacher privileges are maintained continuously
+    setInterval(() => {
+        if (typeof isTeacherUser === 'function' && isTeacherUser()) {
+            removeWritingRestrictionsForTeacher();
+        }
+    }, 1500);
 }
 
 function openLoginModal() {
-    if (isRecitationInProgress) {
-        triggerRecitationCheatWarning('chỉnh sửa thông tin học viên trong lúc trả bài');
-        return;
-    }
-    if (isFullPracticeInProgress) {
-        showToastNotice('🔒 Đang trong thời gian làm bài! Không thể chỉnh sửa thông tin lúc này.', 'fa-solid fa-lock');
-        return;
+    if (!isTeacherUser()) {
+        if (isRecitationInProgress) {
+            triggerRecitationCheatWarning('chỉnh sửa thông tin học viên trong lúc trả bài');
+            return;
+        }
+        if (isFullPracticeInProgress) {
+            showToastNotice('🔒 Đang trong thời gian làm bài! Không thể chỉnh sửa thông tin lúc này.', 'fa-solid fa-lock');
+            return;
+        }
     }
     if (!loginModalOverlay) return;
     if (studentNameInput) studentNameInput.value = currentStudentName || '';
@@ -7345,7 +7412,12 @@ function toggleLoginPassword() {
 window.toggleLoginPassword = toggleLoginPassword;
 
 function updateStudentProfileUI(name, cls) {
-    const isTeacher = (cls === 'GV' || (name && name.includes('PTMN')));
+    const isTeacher = isTeacherUser();
+    if (isTeacher) {
+        removeWritingRestrictionsForTeacher();
+    } else {
+        if (document.body) document.body.classList.remove('teacher-mode');
+    }
     if (studentNameDisplay) studentNameDisplay.textContent = name || 'Chưa đăng nhập';
     if (studentClassDisplay) studentClassDisplay.textContent = isTeacher ? 'Giáo viên (GV)' : (cls ? `Lớp: ${cls}` : 'Lớp: --');
 
@@ -7593,28 +7665,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const tabId = e.currentTarget.dataset.tab;
 
             // Anti-cheating check: Block tab switching if recitation is currently in progress
-            if (isRecitationInProgress && tabId !== 'writingPractice') {
-                e.preventDefault();
-                e.stopPropagation();
-                const tabNames = {
-                    basicInfo: 'THÔNG TIN CƠ BẢN',
-                    identifyingSigns: 'DẤU HIỆU NHẬN BIẾT',
-                    detailedOutline: 'DÀN Ý CHI TIẾT',
-                    sampleWriting: 'BÀI MẪU',
-                    fullPractice: 'THỰC HÀNH',
-                    extraPractice: 'BÀI LUYỆN TẬP THÊM'
-                };
-                const targetTabName = tabNames[tabId] || tabId;
-                triggerRecitationCheatWarning(`chuyển sang tab "${targetTabName}" trên website`);
-                return false;
-            }
+            if (!isTeacherUser()) {
+                if (isRecitationInProgress && tabId !== 'writingPractice') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const tabNames = {
+                        basicInfo: 'THÔNG TIN CƠ BẢN',
+                        identifyingSigns: 'DẤU HIỆU NHẬN BIẾT',
+                        detailedOutline: 'DÀN Ý CHI TIẾT',
+                        sampleWriting: 'BÀI MẪU',
+                        fullPractice: 'THỰC HÀNH',
+                        extraPractice: 'BÀI LUYỆN TẬP THÊM'
+                    };
+                    const targetTabName = tabNames[tabId] || tabId;
+                    triggerRecitationCheatWarning(`chuyển sang tab "${targetTabName}" trên website`);
+                    return false;
+                }
 
-            // Block tab switching if full practice is currently in progress
-            if (isFullPracticeInProgress && tabId !== 'fullPractice') {
-                e.preventDefault();
-                e.stopPropagation();
-                showToastNotice('🔒 Đang trong thời gian thực hành viết bài (20 phút)! Bạn không thể chuyển sang tab khác cho đến khi nộp bài.', 'fa-solid fa-lock');
-                return false;
+                // Block tab switching if full practice is currently in progress
+                if (isFullPracticeInProgress && tabId !== 'fullPractice') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showToastNotice('🔒 Đang trong thời gian thực hành viết bài (20 phút)! Bạn không thể chuyển sang tab khác cho đến khi nộp bài.', 'fa-solid fa-lock');
+                    return false;
+                }
             }
 
             // Remove active class from all buttons and panels
@@ -7778,6 +7852,7 @@ function attachAntiCopyPasteToElement(el, zoneName) {
     if (!el) return;
     ['copy', 'cut', 'paste', 'drop', 'contextmenu'].forEach(evtType => {
         el.addEventListener(evtType, (e) => {
+            if (isTeacherUser()) return; // Teacher bypass
             e.preventDefault();
             e.stopPropagation();
             if (evtType === 'paste' || evtType === 'drop') {
@@ -7790,6 +7865,7 @@ function attachAntiCopyPasteToElement(el, zoneName) {
         });
     });
     el.addEventListener('beforeinput', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') {
             e.preventDefault();
             e.stopPropagation();
@@ -7801,6 +7877,7 @@ function attachAntiCopyPasteToElement(el, zoneName) {
 function initAntiCopyProtection() {
     // Warn before leaving page during active recitation or full practice
     window.addEventListener('beforeunload', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         if (isRecitationInProgress || isFullPracticeInProgress || isExtraPracticeInProgress) {
             e.preventDefault();
             e.returnValue = 'Bạn đang trong quá trình làm bài! Nếu rời khỏi trang, nội dung bài làm sẽ bị hủy.';
@@ -7817,6 +7894,7 @@ function initAntiCopyProtection() {
 
     // Block Copy Event everywhere on site, with specific messaging for writing zones
     document.addEventListener('copy', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         e.preventDefault();
         const zone = getWritingZone(e.target || document.activeElement);
         if (zone !== 'general') {
@@ -7828,6 +7906,7 @@ function initAntiCopyProtection() {
 
     // Block Cut Event everywhere on site
     document.addEventListener('cut', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         e.preventDefault();
         const zone = getWritingZone(e.target || document.activeElement);
         if (zone !== 'general') {
@@ -7839,6 +7918,7 @@ function initAntiCopyProtection() {
 
     // Block Paste Event (allowed only in login name/class inputs)
     document.addEventListener('paste', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         const targetEl = e.target || document.activeElement;
         if (isLoginInput(targetEl)) {
             return;
@@ -7854,6 +7934,7 @@ function initAntiCopyProtection() {
 
     // Block Context Menu (Right Click)
     document.addEventListener('contextmenu', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         const targetEl = e.target || document.activeElement;
         if (isLoginInput(targetEl)) {
             return;
@@ -7869,11 +7950,13 @@ function initAntiCopyProtection() {
 
     // Block Drag and Drop text
     document.addEventListener('dragstart', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         if (!isLoginInput(e.target)) {
             e.preventDefault();
         }
     });
     document.addEventListener('drop', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         const targetEl = e.target || document.activeElement;
         if (isLoginInput(targetEl)) {
             return;
@@ -7887,6 +7970,7 @@ function initAntiCopyProtection() {
 
     // Block Keyboard Shortcuts (Ctrl/Cmd+C, Ctrl/Cmd+V, Ctrl/Cmd+X, Shift+Insert, Ctrl+Insert, Shift+Delete)
     document.addEventListener('keydown', (e) => {
+        if (isTeacherUser()) return; // Teacher bypass
         const isCtrlOrCmd = e.ctrlKey || e.metaKey;
         const key = e.key ? e.key.toLowerCase() : '';
         const targetEl = e.target || document.activeElement;
