@@ -7052,6 +7052,11 @@ function prevRecitationQuestion() {
 function showWelcomeScreen() {
     if (typeof stopSampleAudio === 'function') stopSampleAudio();
     if (!isTeacherUser()) {
+        if (typeof isQuietHours === 'function' && isQuietHours()) {
+            openLoginModal();
+            showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+            return;
+        }
         if (isRecitationInProgress) {
             triggerRecitationCheatWarning('rời khỏi bài để về Trang chủ');
             return;
@@ -7138,6 +7143,11 @@ function renderNav() {
 function selectLetterType(id) {
     if (typeof stopSampleAudio === 'function') stopSampleAudio();
     if (!isTeacherUser()) {
+        if (typeof isQuietHours === 'function' && isQuietHours()) {
+            openLoginModal();
+            showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+            return;
+        }
         if (isRecitationInProgress) {
             triggerRecitationCheatWarning('chuyển sang dạng thư khác trên thanh điều hướng');
             return;
@@ -8499,13 +8509,34 @@ function submitFullPracticeEarly() {
 }
 
 // --- Authentication & Student Profile Management ---
-function initAuthSystem() {
-    const savedName = localStorage.getItem('vstep_student_name');
-    const savedClass = localStorage.getItem('vstep_student_class');
+function getVietnamHour() {
+    try {
+        const hourStr = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour: 'numeric',
+            hour12: false
+        }).format(new Date());
+        return parseInt(hourStr, 10) % 24;
+    } catch (e) {
+        return (new Date().getUTCHours() + 7) % 24;
+    }
+}
 
-    if (savedName && findStudentInfo(savedName)) {
+function isQuietHours() {
+    const vnH = getVietnamHour();
+    return vnH >= 22 || vnH < 5;
+}
+window.getVietnamHour = getVietnamHour;
+window.isQuietHours = isQuietHours;
+
+function initAuthSystem() {
+    const savedName = localStorage.getItem('vstep_student_name') || '';
+    const savedClass = localStorage.getItem('vstep_student_class') || '';
+    const isTeacherSaved = isTeacherUser();
+
+    if (savedName && findStudentInfo(savedName) && (!isQuietHours() || isTeacherSaved)) {
         const studentInfo = findStudentInfo(savedName);
-        if (studentInfo.isTeacher) {
+        if (studentInfo.isTeacher || isTeacherSaved) {
             currentStudentName = 'Cô Nguyệt (PTMN)';
             currentStudentClass = savedClass || 'GV';
         } else {
@@ -8519,36 +8550,64 @@ function initAuthSystem() {
         currentStudentClass = '';
         updateStudentProfileUI('', '');
         openLoginModal();
+        if (isQuietHours() && !isTeacherSaved) {
+            showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+        }
     }
 
-    // Ensure teacher privileges are maintained continuously
+    // Ensure teacher privileges are maintained continuously & real-time night curfew check (22:00 - 05:00)
     setInterval(() => {
         if (typeof isTeacherUser === 'function' && isTeacherUser()) {
             removeWritingRestrictionsForTeacher();
+        } else {
+            // Real-time curfew lock: automatically lock after 22:00 until 05:00
+            if (isQuietHours()) {
+                if (loginModalOverlay && loginModalOverlay.classList.contains('hidden')) {
+                    if (typeof stopRecitationTimer === 'function') stopRecitationTimer();
+                    if (typeof stopFullPracticeTimer === 'function') stopFullPracticeTimer();
+                    if (typeof stopExtraPracticeTimer === 'function') stopExtraPracticeTimer();
+                    openLoginModal();
+                    showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+                }
+            }
         }
     }, 1500);
 }
 
 function openLoginModal() {
     if (!isTeacherUser()) {
-        if (isRecitationInProgress) {
+        if (isRecitationInProgress && !isQuietHours()) {
             triggerRecitationCheatWarning('chỉnh sửa thông tin học viên trong lúc trả bài');
             return;
         }
-        if (isFullPracticeInProgress) {
+        if (isFullPracticeInProgress && !isQuietHours()) {
             showToastNotice('🔒 Đang trong thời gian làm bài! Không thể chỉnh sửa thông tin lúc này.', 'fa-solid fa-lock');
             return;
         }
     }
     if (!loginModalOverlay) return;
-    if (studentNameInput) studentNameInput.value = currentStudentName || '';
-    if (studentClassInput) studentClassInput.value = currentStudentClass || '';
-    if (studentClassSelect) studentClassSelect.value = currentStudentClass || '';
-    if (studentPasswordInput) studentPasswordInput.value = '';
-    if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+    const savedName = localStorage.getItem('vstep_student_name') || '';
+    const savedClass = localStorage.getItem('vstep_student_class') || '';
+    const isTeacherSaved = isTeacherUser();
+
+    if (studentNameInput) studentNameInput.value = isTeacherSaved ? 'PTMN' : (currentStudentName || savedName || '');
+    if (studentClassInput) studentClassInput.value = isTeacherSaved ? 'GV' : (currentStudentClass || savedClass || '');
+    if (studentClassSelect) studentClassSelect.value = isTeacherSaved ? 'GV' : (currentStudentClass || savedClass || '');
+    if (studentPasswordInput) studentPasswordInput.value = isTeacherSaved ? 'GV' : '';
+    
+    if (isQuietHours() && !isTeacherSaved) {
+        showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+    } else {
+        if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+    }
+
     loginModalOverlay.classList.remove('hidden');
     setTimeout(() => {
-        if (studentNameInput) studentNameInput.focus();
+        if (studentPasswordInput && savedName && savedClass && !isTeacherSaved && !isQuietHours()) {
+            studentPasswordInput.focus();
+        } else if (studentNameInput) {
+            studentNameInput.focus();
+        }
     }, 150);
 }
 
@@ -8565,10 +8624,18 @@ function handleLoginSubmit() {
     }
 
     const normName = nameVal.toUpperCase();
-    const isTeacher = (normName === 'PTMN' && (classVal === 'GV' || !classVal)) || (normName === 'CÔ NGUYỆT' || normName === 'CO NGUYET');
     const studentInfo = findStudentInfo(nameVal);
+    const isTeacher = normName === 'PTMN' || 
+                      normName.includes('PTMN') || 
+                      normName === 'CÔ NGUYỆT' || 
+                      normName === 'CO NGUYET' || 
+                      normName.includes('CÔ NGUYỆT') || 
+                      normName.includes('CO NGUYET') ||
+                      classVal === 'GV' || 
+                      (studentInfo && studentInfo.isTeacher);
 
-    if (isTeacher || (studentInfo && studentInfo.isTeacher)) {
+    if (isTeacher) {
+        // Teacher bypasses all restrictions including quiet hours
         currentStudentName = 'Cô Nguyệt (PTMN)';
         currentStudentClass = classVal || 'GV';
         try {
@@ -8577,6 +8644,12 @@ function handleLoginSubmit() {
             localStorage.setItem('vstep_b2_student_info', currentStudentName + ' - ' + currentStudentClass);
         } catch (e) {}
     } else {
+        // Giới hạn thời gian đăng nhập cho học viên: Không cho đăng nhập từ 22:00 đến 05:00 sáng (Giờ Việt Nam)
+        if (isQuietHours()) {
+            showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+            return;
+        }
+
         if (classVal === 'GV') {
             showLoginError('Mã lớp GV chỉ dành riêng cho tài khoản Giáo viên (PTMN)!');
             if (classEl) classEl.focus();
@@ -8883,6 +8956,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLoginSubmit) btnLoginSubmit.addEventListener('click', handleLoginSubmit);
     if (btnEditStudent) btnEditStudent.addEventListener('click', openLoginModal);
     if (studentNameInput) {
+        studentNameInput.addEventListener('input', () => {
+            const val = studentNameInput.value.trim().toUpperCase();
+            if (val === 'PTMN' || val.includes('PTMN') || val.includes('CÔ NGUYỆT') || val.includes('CO NGUYET')) {
+                if (studentClassInput && !studentClassInput.value) studentClassInput.value = 'GV';
+                if (studentClassSelect && !studentClassSelect.value) studentClassSelect.value = 'GV';
+                if (studentPasswordInput && !studentPasswordInput.value) studentPasswordInput.value = 'GV';
+                if (loginErrorMsg && loginErrorText && loginErrorText.textContent.includes('đóng cửa')) {
+                    loginErrorMsg.classList.add('hidden');
+                    loginErrorText.textContent = '';
+                }
+            }
+        });
         studentNameInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleLoginSubmit();
         });
@@ -8908,8 +8993,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof stopSampleAudio === 'function') stopSampleAudio();
             const tabId = e.currentTarget.dataset.tab;
 
-            // Anti-cheating check: Block tab switching if recitation is currently in progress
+            // Anti-cheating & Curfew check: Block tab switching if quiet hours or if recitation is currently in progress
             if (!isTeacherUser()) {
+                if (typeof isQuietHours === 'function' && isQuietHours()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLoginModal();
+                    showLoginError('Miss Nguyệt đóng cửa tiễn khách rồi. Hãy ngủ sớm và quay lại sau 05:00 sáng nhé! 😴');
+                    return false;
+                }
+
                 if (isRecitationInProgress && tabId !== 'writingPractice') {
                     e.preventDefault();
                     e.stopPropagation();
