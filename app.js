@@ -8683,11 +8683,17 @@ function handleLoginSubmit() {
             return;
         }
 
-        if (studentInfo && studentInfo.class && classVal !== studentInfo.class) {
-                showLoginError('Lớp học không đúng! Học viên ' + studentInfo.name + ' thuộc lớp ' + studentInfo.class + '.');
-                if (classEl) classEl.focus();
-                return;
-            }
+        if (!studentInfo) {
+            showLoginError(`Họ và tên "${nameVal}" không có trong danh sách học viên! Vui lòng kiểm tra lại họ và tên có dấu.`);
+            if (studentNameInput) studentNameInput.focus();
+            return;
+        }
+
+        if (studentInfo.class && classVal !== studentInfo.class) {
+            showLoginError(`Học viên "${studentInfo.name}" thuộc lớp ${studentInfo.class}, không phải lớp ${classVal}! Vui lòng nhập đúng mã lớp.`);
+            if (classEl) classEl.focus();
+            return;
+        }
 
         // Check password - accept both STUDYHARD and VSTEPSEPTEMBER
         const passNorm = passVal.toUpperCase();
