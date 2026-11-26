@@ -3792,7 +3792,7 @@ let lastFullPracticeEvaluationData = null;
 let lastExtraPracticeEvaluationData = {};
 
 // Auth & Student Information
-const ALLOWED_CLASSES = ['B209', 'CB206', 'CB210', 'CB211', 'CB213', 'ONB103', 'B212', 'B2', 'GV'];
+const ALLOWED_CLASSES = ['B209', 'CB206', 'CB210', 'CB211', 'CB213', 'ONB103', 'B212', 'GV'];
 const BANNED_CLASSES = ['CB201', 'CB202', 'B220'];
 const MANDATORY_PASSWORD = 'STUDYHARD';
 
@@ -3901,14 +3901,7 @@ const STUDENTS_BY_CLASS = {
         'Đặng Nguyễn Khánh Uyên',
         'Nguyễn Thị Chúc Yến'
     ],
-    'B2': [
-        'Gia Tuệ',
-        'Gia Tuê',
-        'Nguyễn Gia Tuệ',
-        'Trần Gia Tuệ',
-        'Lê Gia Tuệ'
-    ]
-};
+    };
 
 const AUTHORIZED_STUDENTS = [
     ...STUDENTS_BY_CLASS['CB206'],
@@ -3917,7 +3910,6 @@ const AUTHORIZED_STUDENTS = [
     ...STUDENTS_BY_CLASS['CB213'],
     ...STUDENTS_BY_CLASS['ONB103'],
     ...STUDENTS_BY_CLASS['B212'],
-    ...STUDENTS_BY_CLASS['B2'],
     'PTMN'
 ];
 
@@ -8540,6 +8532,13 @@ window.isQuietHours = isQuietHours;
 function initAuthSystem() {
     const savedName = localStorage.getItem('vstep_student_name') || '';
     const savedClass = localStorage.getItem('vstep_student_class') || '';
+    const normSaved = (typeof removeVietnameseTones === 'function' ? removeVietnameseTones(savedName) : savedName).toLowerCase();
+    if (normSaved.includes('gia tue') || normSaved.replace(/\s+/g, '').includes('giatue') || savedClass === 'B2') {
+        localStorage.removeItem('vstep_student_name');
+        localStorage.removeItem('vstep_student_class');
+        localStorage.removeItem('vstep_b2_student_info');
+        return;
+    }
     const isTeacherSaved = isTeacherUser();
 
     if (savedName && findStudentInfo(savedName) && (!isQuietHours() || isTeacherSaved)) {
@@ -8631,6 +8630,14 @@ function handleLoginSubmit() {
         return;
     }
 
+    const normCheck = removeVietnameseTones(nameVal.toLowerCase());
+    const isLockedGiaTue = normCheck.includes('gia tue') || normCheck.replace(/\s+/g, '').includes('giatue');
+    if (isLockedGiaTue || classVal === 'B2') {
+        showLoginError('Tài khoản học viên "Gia Tuệ" hiện đã bị KHÓA! Vui lòng liên hệ Giáo viên (Cô Nguyệt).');
+        if (studentNameInput) studentNameInput.focus();
+        return;
+    }
+
     const normName = nameVal.toUpperCase();
     const studentInfo = findStudentInfo(nameVal);
     const isTeacher = normName === 'PTMN' || 
@@ -8676,16 +8683,11 @@ function handleLoginSubmit() {
             return;
         }
 
-        const isGiaTue = removeVietnameseTones(nameVal.toLowerCase()).includes('gia tue');
         if (studentInfo && studentInfo.class && classVal !== studentInfo.class) {
-            if (isGiaTue && (classVal === 'B212' || classVal === 'B2')) {
-                // Cho phép Gia Tuệ đăng nhập với mã lớp B212 hoặc B2
-            } else {
                 showLoginError('Lớp học không đúng! Học viên ' + studentInfo.name + ' thuộc lớp ' + studentInfo.class + '.');
                 if (classEl) classEl.focus();
                 return;
             }
-        }
 
         // Check password - accept both STUDYHARD and VSTEPSEPTEMBER
         const passNorm = passVal.toUpperCase();
